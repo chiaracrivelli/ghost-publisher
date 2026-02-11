@@ -12,7 +12,7 @@ const PORT = process.env.PORT || 3000;
 
 // CONFIGURAZIONE
 const GHOST_URL = 'https://ustat-prove.ghost.io';
-const ADMIN_API_KEY = 'INCOLLA QUI LA TUA ADMIN API KEY';
+const ADMIN_API_KEY = '698c36e739e45f0001203bfb:371b8d6950caa342371e5b924ec26b513450b24dc2d87d27a3beb701002082bc';
 
 function createJWT() {
   const [id, secret] = ADMIN_API_KEY.split(':');
