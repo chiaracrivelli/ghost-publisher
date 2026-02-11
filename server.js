@@ -25,30 +25,33 @@ function createJWT() {
 }
 
 app.post('/publish', async (req, res) => {
-  const { title, slug, html, tags } = req.body;
+  const { title, slug, html, tags, status } = req.body;  // leggi direttamente i campi inviati
+
+  const token = createJWT(); // la tua funzione JWT rimane uguale
+
+  const payloadGhost = {
+    posts: [{
+      title,
+      slug,
+      html,
+      status: status || 'draft', // forza draft se non specificato
+      tags: tags ? tags.map(t => ({ name: t })) : []
+    }]
+  };
 
   try {
-    const token = createJWT();
-
-    const payload = {
-      title: meta.TITOLO,
-      slug: meta.SLUG,
-      html: html,
-      tags: meta.TAGS ? meta.TAGS.split(',').map(t => t.trim()) : [],
-      status: 'draft'   // <-- qui
-    };
-
     const response = await fetch(`${GHOST_URL}/ghost/api/admin/posts/?source=html`, {
       method: 'POST',
       headers: {
         'Authorization': `Ghost ${token}`,
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify(payload)
+      body: JSON.stringify(payloadGhost)
     });
 
     const data = await response.json();
     res.json(data);
+
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
