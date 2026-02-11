@@ -41,13 +41,13 @@ app.post('/publish', async (req, res) => {
 
   try {
     const response = await fetch(`${GHOST_URL}/ghost/api/admin/posts/?source=html`, {
-      method: 'POST',
-      headers: {
-      'Authorization': `Ghost ${token}`,
-      'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(payloadGhost)
-  });
+  method: 'POST',
+  headers: {
+    'Authorization': `Ghost ${token}`,
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify(payload)
+});
 
     const data = await response.json();
     res.json(data);
