@@ -1,6 +1,5 @@
 const express = require('express');
 const bodyParser = require('body-parser');
-const fetch = require('node-fetch');
 const jwt = require('jsonwebtoken');
 const cors = require('cors');
 
@@ -41,13 +40,13 @@ app.post('/publish', async (req, res) => {
     };
 
     const response = await fetch(`${GHOST_URL}/ghost/api/admin/posts/?source=html`, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Ghost ${token}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(payload)
-    });
+  method: 'POST',
+  headers: {
+    'Authorization': `Ghost ${token}`,
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify(payload)
+});
 
     const data = await response.json();
     res.json(data);
