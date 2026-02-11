@@ -2,22 +2,17 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const fetch = require('node-fetch');
 const jwt = require('jsonwebtoken');
+const cors = require('cors');
 
 const app = express();
+app.use(cors());
 app.use(bodyParser.json());
 
-// 🔹 Abilita CORS
-app.use((req, res, next) => {
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-  if (req.method === 'OPTIONS') return res.sendStatus(200);
-  next();
-});
+const PORT = process.env.PORT || 3000;
 
 // CONFIGURAZIONE
 const GHOST_URL = 'https://ustat-prove.ghost.io';
-const ADMIN_API_KEY = '698c36e739e45f0001203bfb:371b8d6950caa342371e5b924ec26b513450b24dc2d87d27a3beb701002082bc'; // Copia da Ghost Admin API
+const ADMIN_API_KEY = 'INCOLLA QUI LA TUA ADMIN API KEY';
 
 function createJWT() {
   const [id, secret] = ADMIN_API_KEY.split(':');
@@ -29,22 +24,22 @@ function createJWT() {
   });
 }
 
-// 🔹 Route per pubblicare articoli
 app.post('/publish', async (req, res) => {
   const { title, slug, html, tags } = req.body;
-  const token = createJWT();
-
-  const payload = {
-    posts: [{
-      title,
-      slug,
-      html,
-      status: 'published',
-      tags: tags ? tags.map(t => ({ name: t })) : []
-    }]
-  };
 
   try {
+    const token = createJWT();
+
+    const payload = {
+      posts: [{
+        title,
+        slug,
+        html,
+        status: 'published',
+        tags: tags ? tags.map(t => ({ name: t })) : []
+      }]
+    };
+
     const response = await fetch(`${GHOST_URL}/ghost/api/admin/posts/?source=html`, {
       method: 'POST',
       headers: {
@@ -61,6 +56,10 @@ app.post('/publish', async (req, res) => {
   }
 });
 
-// 🔹 Porta dinamica per Render
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`Server Ghost Publisher avviato sulla porta ${PORT}`));
+app.get('/', (req, res) => {
+  res.send('Ghost Publish API attivo 🚀');
+});
+
+app.listen(PORT, () => {
+  console.log('Server avviato sulla porta', PORT);
+}); 
