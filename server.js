@@ -1,17 +1,16 @@
 const express = require('express');
-const bodyParser = require('body-parser');
-const jwt = require('jsonwebtoken');
 const cors = require('cors');
+const jwt = require('jsonwebtoken');
 
 const app = express();
 app.use(cors());
-app.use(bodyParser.json());
+app.use(express.json());  // <- usa express.json() al posto di body-parser
 
 const PORT = process.env.PORT || 3000;
 
 // CONFIGURAZIONE
 const GHOST_URL = 'https://ustat-prove.ghost.io';
-const ADMIN_API_KEY = '698c36e739e45f0001203bfb:371b8d6950caa342371e5b924ec26b513450b24dc2d87d27a3beb701002082bc';
+const ADMIN_API_KEY = '698c36e739e45f0001203bfb:...';
 
 function createJWT() {
   const [id, secret] = ADMIN_API_KEY.split(':');
@@ -24,16 +23,21 @@ function createJWT() {
 }
 
 app.post('/publish', async (req, res) => {
-  const { title, slug, html, tags, status } = req.body;  // leggi direttamente i campi inviati
+  // 🔹 Controllo che req.body esista
+  if (!req.body) {
+    return res.status(400).json({ error: 'body JSON mancante' });
+  }
 
-  const token = createJWT(); // la tua funzione JWT rimane uguale
+  const { title, slug, html, tags, status } = req.body;
+
+  const token = createJWT();
 
   const payloadGhost = {
     posts: [{
       title,
       slug,
       html,
-      status: status || 'draft', // forza draft se non specificato
+      status: status || 'draft',
       tags: tags ? tags.map(t => ({ name: t })) : []
     }]
   };
@@ -42,11 +46,11 @@ app.post('/publish', async (req, res) => {
     const response = await fetch(`${GHOST_URL}/ghost/api/admin/posts/?source=html`, {
       method: 'POST',
       headers: {
-      'Authorization': `Ghost ${token}`,
-      'Content-Type': 'application/json'
+        'Authorization': `Ghost ${token}`,
+        'Content-Type': 'application/json'
       },
       body: JSON.stringify(payloadGhost)
-  });
+    });
 
     const data = await response.json();
     res.json(data);
@@ -60,6 +64,4 @@ app.get('/', (req, res) => {
   res.send('Ghost Publisher API attivo 🚀');
 });
 
-app.listen(PORT, () => {
-  console.log('Server avviato sulla porta', PORT);
-});
+app.listen(PORT, () => console.log('Server avviato sulla porta', PORT));
