@@ -52,8 +52,9 @@ app.post('/publish', async (req, res) => {
       body: JSON.stringify(payloadGhost)
     });
 
-    const data = await response.json();
-    res.json(data);
+    const text = await response.text();
+    console.log("RISPOSTA GHOST:", text);
+    res.status(response.status).send(text);
 
   } catch (err) {
     res.status(500).json({ error: err.message });
